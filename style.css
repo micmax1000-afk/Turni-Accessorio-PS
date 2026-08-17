@@ -1,0 +1,369 @@
+/* =========================================================
+   SIMULATORE CEDOLINO — Polizia di Stato
+   Identità: registro amministrativo (inchiostro/carta/gallone)
+   + firma: il Cedolino reso come tabulato a modulo continuo
+   =========================================================*/
+
+:root{
+  --inchiostro: #1B2440;
+  --inchiostro-chiaro: #2C3A63;
+  --carta: #ECEFEA;
+  --pannello: #FFFFFF;
+  --testo: #1E2129;
+  --testo-tenue: #666B63;
+  --gallone: #6E7C91;
+  --gallone-chiaro: #A9B6C7;
+  --rosso-bollo: #A23B34;
+  --azzurro-sabato: #4F79C4;
+  --verde-modulo: #4F7A5A;
+  --bordo: #D7D9CD;
+  --tipo-mattina: transparent;
+  --tipo-pomeriggio: transparent;
+  --tipo-sera: transparent;
+  --tipo-notte: #D9EBFA;
+  --tipo-riposo: #DCEEDD;
+  --tipo-assenza: #F3E5C0;
+  --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-corpo: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-cifre: 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, Consolas, monospace;
+  --raggio: 3px;
+  --ombra: 0 1px 2px rgba(27,36,64,0.07), 0 4px 14px rgba(27,36,64,0.06);
+}
+[data-tema="scuro"]{
+  --carta: #14161B; --pannello: #1C1F26; --testo: #E7E6DF; --testo-tenue: #9A9C93;
+  --inchiostro: #0D101C; --inchiostro-chiaro: #232C4A;
+  --bordo: #2A2D33; --ombra: 0 1px 3px rgba(0,0,0,0.5);
+  --tipo-mattina: transparent; --tipo-pomeriggio: transparent; --tipo-sera: transparent;
+  --tipo-notte: #1F3550; --tipo-riposo: #203323; --tipo-assenza: #3D3418;
+}
+
+*{ box-sizing: border-box; }
+body{ margin:0; background: var(--carta); color: var(--testo); font-family: var(--font-corpo); line-height:1.55; }
+h2{ font-family: var(--font-display); font-weight:600; font-size:1.2rem; margin:0 0 4px; color: var(--inchiostro); letter-spacing:-0.01em; }
+[data-tema="scuro"] h2{ color: var(--gallone-chiaro); }
+h3{ font-family: var(--font-display); font-weight:600; }
+.sotto-titolo{ margin:0 0 14px; color: var(--testo-tenue); font-size:0.85rem; }
+
+/* ---------- BARRA SCHEDE (sostituisce il vecchio header) ---------- */
+.btn-icona{ background:none; border:1px solid var(--bordo); color: var(--testo); border-radius: var(--raggio); width:32px; height:32px; cursor:pointer; font-size:0.95rem; transition: background 0.15s ease, border-color 0.15s ease; }
+.btn-icona:hover{ background: var(--carta); border-color: var(--gallone); }
+
+/* ---------- LAYOUT ---------- */
+.documento{ max-width:900px; margin:0 auto; padding:22px 16px 60px; }
+
+.barra-schede{
+  position: sticky; top:0; z-index:50; display:flex; flex-direction:column; align-items:center;
+  max-width:900px; margin:0 auto; padding:10px 16px; gap:8px;
+  background: var(--carta); border-bottom:1px solid var(--bordo);
+}
+.riga-schede{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; width:100%; }
+.scheda-nav{
+  flex: 1 1 0; min-width:0; padding:8px 6px; border:1px solid var(--bordo); border-radius: var(--raggio); background: var(--pannello);
+  color: var(--testo-tenue); font-family: var(--font-corpo); font-weight:500; font-size:0.72rem; cursor:pointer; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; text-align:center;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.scheda-nav-piena{ flex:1 1 100%; text-align:center; font-size:0.85rem; padding:9px 14px; }
+.scheda-nav.attiva{ background: var(--inchiostro); color:#fff; border-color: var(--inchiostro); }
+[data-tema="scuro"] .scheda-nav.attiva{ background: var(--gallone-chiaro); color: var(--inchiostro); border-color: var(--gallone-chiaro); }
+.scheda-nav:not(.attiva):hover{ border-color: var(--gallone); }
+.scheda{ background: var(--pannello); border:1px solid var(--bordo); border-radius: var(--raggio); box-shadow: var(--ombra); padding:18px 20px; margin-bottom:18px; }
+
+/* ---------- CALENDARIO ---------- */
+.scheda-calendario{ position:relative; padding-bottom:26px; }
+.calendario-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.etichetta-mese-btn{
+  margin:0; font-size:1.15rem; font-family: var(--font-display); font-weight:600; color: var(--inchiostro);
+  background:none; border:none; cursor:pointer; padding:4px 8px; border-radius: var(--raggio);
+  transition: background 0.15s ease;
+}
+[data-tema="scuro"] .etichetta-mese-btn{ color: var(--gallone-chiaro); }
+.etichetta-mese-btn:hover{ background: var(--carta); }
+.btn-freccia{
+  background:none; border:1px solid var(--bordo); color: var(--inchiostro); width:34px; height:34px;
+  border-radius:50%; font-size:1.2rem; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+[data-tema="scuro"] .btn-freccia{ color: var(--gallone-chiaro); }
+.btn-freccia:hover{ border-color: var(--gallone); background: var(--carta); }
+.calendario-giorni-settimana{ display:grid; grid-template-columns: repeat(7,1fr); text-align:center; font-size:0.68rem; font-family: var(--font-corpo); color: var(--testo-tenue); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.03em; }
+.calendario-griglia{ display:grid; grid-template-columns: repeat(7,1fr); gap:4px; }
+
+.legenda-colori{ display:flex; flex-wrap:wrap; gap:10px 14px; margin-top:12px; font-size:0.72rem; color: var(--testo-tenue); }
+.barra-backup{ display:flex; flex-wrap:wrap; gap:10px; }
+.legenda-colori .pallino{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+
+.giorno-cella{
+  aspect-ratio: 1 / 1; border:2px solid transparent; border-radius:8px;
+  cursor:pointer; background:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  position:relative; margin:0 auto; width:100%;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.giorno-cella:hover{ background: var(--carta); }
+.giorno-cella.vuota{ background:none; border:none; cursor:default; }
+.giorno-numero{ font-family: var(--font-cifre); font-size:1.25rem; color: var(--testo); line-height:1; }
+.giorno-cella.festivo .giorno-numero{ color: var(--rosso-bollo); }
+.giorno-cella.ha-turno .giorno-numero{ font-weight:700; }
+.giorno-cella.riposo-giorno .giorno-numero{ color: var(--testo-tenue); text-decoration: line-through; text-decoration-thickness:1px; font-weight:400; }
+.giorno-etichetta{
+  font-family: var(--font-corpo); font-size:0.62rem; font-weight:600; text-transform:uppercase; letter-spacing:0.02em;
+  color: var(--testo-tenue); opacity:0.85; line-height:1;
+}
+.giorno-cella.selezionata .giorno-etichetta{ color:#fff; opacity:0.95; }
+[data-tema="scuro"] .giorno-cella.selezionata .giorno-etichetta{ color: var(--inchiostro); }
+.giorno-servizio-marcatore{
+  position:absolute; top:2px; right:4px; font-size:0.62rem; color: var(--gallone); opacity:0.85; line-height:1;
+}
+.giorno-cella.selezionata .giorno-servizio-marcatore{ color:#fff; }
+
+/* Colore di sfondo tenue per tipo di turno (calcolato sulla fascia oraria prevalente) */
+.giorno-cella.tipo-mattina{ background: var(--tipo-mattina); }
+.giorno-cella.tipo-pomeriggio{ background: var(--tipo-pomeriggio); }
+.giorno-cella.tipo-sera{ background: var(--tipo-sera); }
+.giorno-cella.tipo-notte{ background: var(--tipo-notte); }
+.giorno-cella.tipo-riposo{ background: var(--tipo-riposo); }
+.giorno-cella.tipo-assenza{ background: var(--tipo-assenza); }
+
+.giorno-cella.oggi{ border-color: var(--azzurro-sabato); }
+.giorno-cella.selezionata{ background: var(--inchiostro) !important; }
+.giorno-cella.selezionata .giorno-numero{ color:#fff; }
+.giorno-cella.selezionata.sabato .giorno-numero,
+.giorno-cella.selezionata.festivo .giorno-numero{ color:#fff; }
+[data-tema="scuro"] .giorno-cella.selezionata{ background: var(--gallone-chiaro) !important; }
+[data-tema="scuro"] .giorno-cella.selezionata .giorno-numero{ color: var(--inchiostro); }
+
+.dettaglio-giorno{ margin-top:18px; padding-top:14px; border-top:1px solid var(--bordo); }
+.dettaglio-giorno-riga{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.dettaglio-giorno-azioni{ display:flex; gap:6px; flex-shrink:0; }
+.btn-mini-icona{
+  background: var(--carta); border:1px solid var(--bordo); color: var(--testo); border-radius: var(--raggio);
+  width:30px; height:30px; font-size:0.85rem; cursor:pointer; transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+.btn-mini-icona:hover:not(:disabled){ border-color: var(--gallone); }
+.btn-mini-icona:disabled{ opacity:0.35; cursor:default; }
+.btn-elenco-date{
+  width:auto; height:auto; background: var(--carta); border:1px solid var(--bordo); color: var(--testo);
+  border-radius: var(--raggio); font-size:0.78rem; padding:5px 10px; cursor:pointer; white-space:normal;
+  text-align:left; line-height:1.3;
+}
+.btn-elenco-date:hover{ border-color: var(--gallone); }
+.lista-date-disponibili{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.chip-data{
+  display:inline-block; background: var(--carta); border:1px solid var(--bordo); border-radius:4px;
+  padding:3px 8px; font-size:0.78rem; font-family: var(--font-cifre); color: var(--testo);
+}
+.dettaglio-giorno-titolo{ font-family: var(--font-display); font-weight:600; font-size:1rem; color: var(--inchiostro); text-transform:capitalize; }
+[data-tema="scuro"] .dettaglio-giorno-titolo{ color: var(--gallone-chiaro); }
+.dettaglio-giorno-corpo{ margin-top:6px; font-size:0.85rem; color: var(--testo-tenue); font-family: var(--font-cifre); white-space:pre-line; }
+.dettaglio-riga-orario{ font-size:0.95rem; color: var(--testo); font-weight:600; }
+.dettaglio-orario-straordinario{ font-size:0.78rem; font-weight:500; color: var(--testo-tenue); }
+.dettaglio-servizio-svolto{
+  margin-top:4px; padding:6px 9px; background: var(--carta); border-left:3px solid var(--gallone);
+  border-radius:3px; font-family: var(--font-corpo); font-size:0.85rem; color: var(--testo);
+}
+.dettaglio-riga-ore{ margin-top:6px; font-size:0.78rem; }
+.nota-giorno-campo{ margin-top:12px; }
+.nota-giorno-campo textarea{
+  width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--bordo); border-radius: var(--raggio);
+  background: var(--pannello); color: var(--testo); font-family: var(--font-corpo); font-size:0.85rem; resize:vertical;
+}
+
+.fab-aggiungi{
+  position:absolute; right:18px; bottom:18px; width:52px; height:52px; border-radius:50%;
+  background: var(--inchiostro); color:#fff; border:none; font-size:1.6rem; line-height:1; cursor:pointer;
+  box-shadow: 0 4px 14px rgba(27,36,64,0.35); transition: background 0.15s ease, transform 0.1s ease;
+}
+.fab-aggiungi:hover{ background: var(--inchiostro-chiaro); }
+.fab-aggiungi:active{ transform: scale(0.94); }
+[data-tema="scuro"] .fab-aggiungi{ background: var(--gallone-chiaro); color: var(--inchiostro); }
+
+/* ---------- TABELLE (Riepilogo ore) ---------- */
+.tabella-voci{ width:100%; border-collapse:collapse; }
+.tabella-voci th{ text-align:left; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color: var(--testo-tenue); border-bottom:1px solid var(--bordo); padding:6px 8px; font-family: var(--font-corpo); }
+.tabella-voci td{ padding:6px 8px; border-bottom:1px dashed var(--bordo); }
+.tabella-voci tfoot td{ border-top:2px solid var(--inchiostro); border-bottom:none; padding-top:10px; }
+[data-tema="scuro"] .tabella-voci tfoot td{ border-top-color: var(--gallone); }
+.totale-riga{ font-family: var(--font-cifre); text-align:right; }
+
+/* ---------- BOTTONI ---------- */
+.btn-primario, .btn-secondario{ font-family: var(--font-corpo); font-weight:500; font-size:0.87rem; padding:9px 16px; border-radius: var(--raggio); cursor:pointer; border:1px solid transparent; transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease; }
+.btn-primario{ background: var(--inchiostro); color:#fff; }
+.btn-primario:hover{ background: var(--inchiostro-chiaro); }
+.btn-primario:active{ transform: scale(0.98); }
+.btn-secondario{ background: var(--pannello); color: var(--inchiostro); border-color: var(--bordo); }
+[data-tema="scuro"] .btn-secondario{ color: var(--gallone-chiaro); }
+.btn-secondario:hover{ border-color: var(--gallone); }
+
+.nota-piede{ text-align:left; font-size:0.76rem; line-height:1.55; color: var(--testo-tenue); margin:0; }
+.nota-finale{ padding:14px 16px; }
+
+/* ---------- MODALI ---------- */
+.overlay{ position:fixed; inset:0; background: rgba(14,17,28,0.6); display:flex; align-items:center; justify-content:center; z-index:100; padding:16px; }
+.overlay[hidden]{ display:none; }
+.modale{ background: var(--pannello); border-radius:6px; max-width:480px; width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 14px 48px rgba(0,0,0,0.32); }
+.modale-header{ display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--bordo); }
+.modale-header h2{ margin:0; }
+.modale-corpo{ padding:14px 18px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+.modale-footer{ display:flex; justify-content:flex-end; gap:10px; padding:14px 18px; border-top:1px solid var(--bordo); }
+
+.pannello-turno-inline{
+  margin-top:16px; border:1px solid var(--bordo); border-radius:8px; background: var(--pannello);
+  box-shadow:0 2px 10px rgba(0,0,0,0.06); scroll-margin-top:12px;
+}
+.pannello-turno-header{ display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--bordo); }
+.pannello-turno-header h2{ margin:0; font-size:1.05rem; }
+.pannello-turno-corpo{ padding:14px 18px; display:flex; flex-direction:column; gap:10px; }
+.pannello-turno-footer{ display:flex; justify-content:flex-end; gap:10px; padding:14px 18px; border-top:1px solid var(--bordo); position:sticky; bottom:0; background: var(--pannello); }
+.campo-modale{ display:flex; flex-direction:column; gap:4px; font-size:0.85rem; color: var(--testo-tenue); }
+.valore-automatico{
+  padding:9px 12px; border:1px solid var(--bordo); border-radius: var(--raggio); background: var(--carta);
+  color: var(--testo); font-family: var(--font-cifre); font-weight:600; font-size:0.95rem;
+}
+.campo-modale input, .campo-modale select{ padding:7px 9px; border:1px solid var(--bordo); border-radius:3px; background: var(--carta); color: var(--testo); font-family: var(--font-corpo); }
+.campo-modale input:focus, .campo-modale select:focus{ outline:2px solid var(--gallone); outline-offset:1px; }
+.campo-modale.campo-riga{ flex-direction:row; align-items:center; gap:8px; font-size:0.88rem; color: var(--testo); }
+.campo-modale.campo-riga input{ width:auto; }
+.griglia-check{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px; }
+.anteprima-classificazione{ background: var(--carta); border:1px dashed var(--bordo); border-radius:3px; padding:10px; font-size:0.8rem; font-family: var(--font-cifre); white-space: pre-line; }
+
+.avviso-tabelle{ background: rgba(162,59,52,0.08); border:1px solid var(--rosso-bollo); border-radius:3px; padding:10px 12px; font-size:0.8rem; margin:0 0 10px; color: var(--rosso-bollo); }
+[data-tema="scuro"] .avviso-tabelle{ background: rgba(162,59,52,0.15); }
+.gruppo-tabelle{ margin-bottom:14px; }
+.gruppo-tabelle h3{ font-size:0.92rem; margin:0 0 6px; color: var(--inchiostro); }
+[data-tema="scuro"] .gruppo-tabelle h3{ color: var(--gallone-chiaro); }
+.riga-tabella{ display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:0.85rem; padding:4px 0; }
+.riga-tabella input{ width:100px; padding:6px 8px; border:1px solid var(--bordo); border-radius:3px; background: var(--carta); color: var(--testo); font-family: var(--font-cifre); text-align:right; }
+
+.riga-assenza{ display:grid; grid-template-columns: 1fr 70px 60px 26px; gap:8px; align-items:center; padding:7px 0; border-bottom:1px solid var(--bordo); font-size:0.85rem; }
+.riga-assenza:last-child{ border-bottom:none; }
+.riga-assenza input[type="text"]{ padding:6px 8px; border:1px solid var(--bordo); border-radius:3px; background: var(--carta); color: var(--testo); font-family: var(--font-corpo); }
+.riga-assenza input[type="number"]{ padding:6px 6px; border:1px solid var(--bordo); border-radius:3px; background: var(--carta); color: var(--testo); font-family: var(--font-cifre); text-align:right; width:100%; }
+.riga-assenza select{ padding:6px 4px; border:1px solid var(--bordo); border-radius:3px; background: var(--carta); color: var(--testo); font-family: var(--font-corpo); }
+.riga-assenza .riga-rimuovi{ justify-self:center; }
+
+.btn-sequenza{ width:100%; margin-top:14px; }
+.btn-cancella-turni{ color: var(--rosso-bollo); border-color: var(--rosso-bollo); }
+.btn-cancella-turni:hover{ background: rgba(162,59,52,0.08); }
+.lista-sequenza{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+.riga-sequenza{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.riga-sequenza-orari{ display:flex; gap:10px; margin:2px 0 6px 24px; }
+.riga-sequenza-orari .campo-modale{ flex:1; max-width:150px; }
+.riga-sequenza-orari input{ width:100%; box-sizing:border-box; padding:6px 8px; border:1px solid var(--bordo); border-radius:3px; background: var(--carta); color: var(--testo); }
+.riga-sequenza span.numero-passo{ font-family: var(--font-cifre); font-size:0.75rem; color: var(--testo-tenue); width:16px; }
+.riga-sequenza select{ flex:1 1 130px; min-width:130px; padding:7px 9px; border:1px solid var(--bordo); border-radius:3px; background: var(--carta); color: var(--testo); font-family: var(--font-corpo); }
+.btn-extra-sequenza{
+  background: var(--carta); border:1px solid var(--bordo); color: var(--testo); border-radius:3px;
+  padding:6px 8px; font-size:0.78rem; cursor:pointer; flex-shrink:0; white-space:nowrap;
+}
+.btn-extra-sequenza:hover{ border-color: var(--gallone); }
+.pannello-extra-sequenza{
+  background: var(--carta); border:1px dashed var(--bordo); border-radius:3px;
+  padding:10px; margin:-2px 0 6px 24px; display:flex; flex-direction:column; gap:8px;
+}
+.riga-assenza-nota{ grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-top:2px; flex-wrap:wrap; }
+.assenza-usate{ font-size:0.72rem; color: var(--testo-tenue); }
+.assenza-rimanenti{ font-family: var(--font-cifre); font-weight:700; font-size:0.95rem; padding:2px 9px; border-radius:12px; }
+.assenza-rimanenti.positivo{ background: var(--tipo-riposo); color: var(--testo); }
+.assenza-rimanenti.zero{ background: var(--bordo); color: var(--testo-tenue); }
+.assenza-rimanenti.esaurito{ background: rgba(162,59,52,0.15); color: var(--rosso-bollo); }
+.indicatore-salvato{ font-size:0.7rem; font-weight:600; color: var(--verde-modulo); opacity:0; transition: opacity 0.3s ease; }
+.indicatore-salvato.visibile{ opacity:1; }
+
+.intestazione-scheda{ display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.intestazione-scheda h2{ margin:0; }
+
+/* =========================================================
+   FIRMA — Cedolino reso come tabulato a modulo continuo
+   (carta a bande verdi, bordi perforati, timbro rosso)
+   =========================================================*/
+#sezioneCedolino{ background: var(--pannello); }
+
+.contenitore-cedolino{
+  margin-top:16px; position:relative;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(79,122,90,0.10) 0px, rgba(79,122,90,0.10) 22px,
+      transparent 22px, transparent 44px
+    ),
+    #FAFAF6;
+  border-top: 2px dashed var(--verde-modulo);
+  border-bottom: 2px dashed var(--verde-modulo);
+  padding: 22px 34px;
+  font-family: var(--font-cifre);
+}
+[data-tema="scuro"] .contenitore-cedolino{
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(79,122,90,0.16) 0px, rgba(79,122,90,0.16) 22px,
+      transparent 22px, transparent 44px
+    ),
+    #16181D;
+}
+/* fori di trazione (tractor-feed) sui due lati */
+.contenitore-cedolino::before, .contenitore-cedolino::after{
+  content:''; position:absolute; top:0; bottom:0; width:22px;
+  background-image: radial-gradient(circle, var(--carta) 3.5px, transparent 3.6px);
+  background-size: 22px 22px; background-position: center top;
+  background-repeat: repeat-y;
+}
+.contenitore-cedolino::before{ left:-1px; border-right:1px dashed var(--verde-modulo); }
+.contenitore-cedolino::after{ right:-1px; border-left:1px dashed var(--verde-modulo); }
+
+.cedolino-sezione{ margin-bottom:14px; }
+.cedolino-sezione h4{ font-family: var(--font-display); font-weight:600; font-size:0.9rem; color: var(--inchiostro); margin:0 0 6px; border-bottom:1px solid var(--bordo); padding-bottom:4px; }
+[data-tema="scuro"] .cedolino-sezione h4{ color: var(--gallone-chiaro); }
+.cedolino-riga{ display:flex; justify-content:space-between; font-size:0.85rem; padding:3px 0; }
+.cedolino-riga span:first-child{ font-family: var(--font-corpo); }
+.cedolino-riga.sottrazione span:last-child{ color: var(--rosso-bollo); }
+.cedolino-totale{ display:flex; justify-content:space-between; font-weight:600; font-size:1rem; padding-top:6px; border-top:1px solid var(--bordo); margin-top:4px; }
+.cedolino-netto{ text-align:center; margin-top:16px; padding:16px; background: var(--carta); border-radius:3px; border:1px solid var(--bordo); }
+.cedolino-netto .etichetta{ font-size:0.75rem; color: var(--testo-tenue); text-transform:uppercase; letter-spacing:0.06em; font-family: var(--font-corpo); }
+.cedolino-netto .valore{ font-family: var(--font-cifre); font-size:1.9rem; font-weight:600; color: var(--verde-modulo); }
+[data-tema="scuro"] .cedolino-netto .valore{ color: #7FC79A; }
+
+/* timbro rosso ruotato */
+.timbro-simulazione{
+  position:absolute; top:14px; right:34px;
+  border:2.5px solid var(--rosso-bollo); border-radius:4px;
+  color: var(--rosso-bollo); font-family: var(--font-corpo); font-weight:600;
+  font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase;
+  padding:5px 9px; transform: rotate(-6deg); opacity:0.82;
+  pointer-events:none; text-align:center; line-height:1.3;
+}
+@media (max-width: 640px){
+  .contenitore-cedolino{ padding:20px 24px; }
+  .timbro-simulazione{ position:static; display:inline-block; transform:rotate(-3deg); margin-bottom:10px; }
+}
+
+/* ---------- STAMPA — mostra solo il cedolino generato ---------- */
+@media print {
+  body *{ visibility:hidden; }
+  #contenitoreCedolino, #contenitoreCedolino *{ visibility:visible; }
+  #contenitoreCedolino{
+    position:absolute; top:0; left:0; width:100%; margin:0; box-shadow:none;
+    border:1px solid #ccc;
+  }
+  .barra-schede, .fab-aggiungi, .nota-finale, #sezioneBackup, #btnGeneraCedolino, #btnStampaCedolino{ display:none !important; }
+  .timbro-simulazione{ position:static; display:block; margin:0 0 12px; transform:none; }
+}
+
+.avviso-backup{ color: var(--rosso-bollo); font-weight:600; }
+
+.pannello-colori-turni{ background: var(--pannello); border:1px solid var(--bordo); border-radius: var(--raggio); padding:12px; margin-bottom:12px; }
+.riga-colore-categoria{ margin-bottom:12px; }
+.riga-colore-categoria:last-child{ margin-bottom:0; }
+.riga-colore-categoria .etichetta-categoria{ font-weight:600; font-size:0.85rem; margin-bottom:5px; display:block; }
+.griglia-swatch{ display:flex; flex-wrap:wrap; gap:6px; }
+.swatch-colore-libero{
+  width:36px; height:36px; border-radius:50%; border:2px solid var(--bordo); cursor:pointer;
+  overflow:hidden; display:inline-block; position:relative; flex-shrink:0;
+  background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+.swatch-colore-libero:hover{ transform: scale(1.1); }
+.swatch-colore-libero input[type="color"]{
+  position:absolute; top:-6px; left:-6px; width:48px; height:48px; border:none; padding:0;
+  cursor:pointer; opacity:0;
+}

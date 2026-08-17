@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turni & Accessorio PS</title>
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B2440">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+
+<nav class="barra-schede">
+  <div class="riga-schede">
+    <button class="scheda-nav scheda-nav-piena" id="btnAnagrafica" type="button">🪪 Anagrafica</button>
+  </div>
+  <div class="riga-schede">
+    <button class="scheda-nav attiva" id="tabTurni" type="button">📅 Turni</button>
+    <button class="scheda-nav" id="tabAssenze" type="button">🗂️ Assenze</button>
+    <button class="scheda-nav" id="btnTabelle" type="button">📊 Tabelle</button>
+    <button class="scheda-nav" id="tabCedolino" type="button">💶 Cedolino</button>
+    <button class="scheda-nav" id="btnTheme" type="button"><span style="font-size:0.85em;">🌓</span> Tema</button>
+  </div>
+</nav>
+
+<main class="documento">
+
+  <div id="vistaTurni">
+  <section class="scheda scheda-calendario">
+    <div class="calendario-header">
+      <button class="btn-freccia" id="btnMesePrec" type="button" aria-label="Mese precedente">‹</button>
+      <button class="etichetta-mese-btn" id="etichettaMese" type="button" title="Vai a un mese specifico">—</button>
+      <button class="btn-freccia" id="btnMeseSucc" type="button" aria-label="Mese successivo">›</button>
+    </div>
+    <div class="calendario-giorni-settimana">
+      <span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
+    </div>
+    <div class="calendario-griglia" id="calendarioGriglia"></div>
+    <div class="legenda-colori" id="legendaColoriTurni">
+    </div>
+    <div style="margin:-4px 0 8px;">
+      <button class="btn-mini-icona" id="btnApriColoriTurni" type="button" title="Personalizza colori turni" style="width:auto; height:auto; padding:3px 9px; font-size:0.78rem;">🎨 Colori turni</button>
+    </div>
+    <div id="pannelloColoriTurni" class="pannello-colori-turni" hidden>
+      <p class="sotto-titolo" style="margin:0 0 8px;">Scegli un colore per ogni categoria di turno — si applica anche ai turni generati dalla sequenza automatica, perché il colore segue l'orario del turno, non come è stato inserito.</p>
+      <div id="corpoColoriTurni"></div>
+      <button class="btn-secondario" id="btnRipristinaColoriTurni" type="button" style="margin-top:8px;">↺ Ripristina colori predefiniti</button>
+    </div>
+
+    <button class="btn-secondario btn-sequenza" id="btnApriSequenza" type="button">🔁 Genera sequenza turni automatica</button>
+    <button class="btn-secondario btn-sequenza btn-cancella-turni" id="btnCancellaTurniMese" type="button">🗑️ Cancella turni del mese</button>
+
+    <div class="dettaglio-giorno" id="dettaglioGiorno">
+      <div class="dettaglio-giorno-riga">
+        <div class="dettaglio-giorno-titolo" id="dettaglioGiornoTitolo">Seleziona un giorno</div>
+        <div class="dettaglio-giorno-azioni">
+          <button class="btn-mini-icona" id="btnCopiaTurno" title="Copia questo turno" aria-label="Copia questo turno" disabled>📄</button>
+          <button class="btn-mini-icona" id="btnIncollaTurno" title="Incolla turno copiato" aria-label="Incolla turno copiato" disabled>📌</button>
+        </div>
+      </div>
+      <div class="dettaglio-giorno-corpo" id="dettaglioGiornoCorpo"></div>
+      <label class="campo-modale nota-giorno-campo">🗒️ Nota del giorno
+        <textarea id="campoNotaGiorno" rows="2" placeholder="Impegni lavorativi o personali da svolgere nella giornata selezionata..."></textarea>
+      </label>
+    </div>
+
+    <button class="fab-aggiungi" id="btnFabTurno" type="button" aria-label="Aggiungi o modifica turno del giorno selezionato">+</button>
+
+    <div class="pannello-turno-inline" id="pannelloTurno" hidden>
+      <div class="pannello-turno-header"><h2 id="titoloModaleTurno">Turno del giorno</h2><button class="btn-icona" id="btnChiudiTurno" aria-label="Chiudi">✕</button></div>
+      <div class="pannello-turno-corpo">
+        <label class="campo-modale campo-riga">
+          <input type="checkbox" id="campoRiposo"> Giorno di riposo
+        </label>
+        <label class="campo-modale">Assenza dal servizio
+          <select id="campoAssenzaTipo">
+            <option value="">— nessuna (turno di lavoro o riposo) —</option>
+          </select>
+        </label>
+        <div id="campiRiposoCompensativo" style="display:none;">
+          <label class="campo-modale">Turno sostituito — dalle<input type="time" id="campoRCOraInizio"></label>
+          <label class="campo-modale">alle<input type="time" id="campoRCOraFine"></label>
+          <p class="sotto-titolo" id="anteprimaRiposoCompensativo" style="margin:-4px 0 6px;"></p>
+        </div>
+        <label class="campo-modale">Modello turno rapido
+          <select id="campoModelloTurno">
+            <option value="">— scegli un modello (facoltativo) —</option>
+            <optgroup label="Turno in quinta">
+              <option value="mattina">Mattina (07:00–13:00)</option>
+              <option value="pomeriggio">Pomeriggio (13:00–19:00)</option>
+              <option value="sera24">Sera (19:00–24:00)</option>
+              <option value="sera01">Sera (19:00–01:00)</option>
+              <option value="notte00">Notte (00:00–07:00)</option>
+              <option value="notte01">Notte (01:00–07:00)</option>
+              <option value="riposo">Riposo</option>
+            </optgroup>
+            <optgroup label="Altri turni">
+              <option value="mattutino">Turno 08:00–14:00</option>
+              <option value="pomeridiano">Turno 14:00–20:00</option>
+            </optgroup>
+          </select>
+        </label>
+        <div id="campiOrario">
+          <label class="campo-modale">Ora inizio<input type="time" id="campoOraInizio"></label>
+          <label class="campo-modale">Ora fine<input type="time" id="campoOraFine"></label>
+          <label class="campo-modale">Servizio svolto<input type="text" id="campoServizioSvolto" placeholder="es. Pattugliamento, Ufficio denunce, Scorta..."></label>
+
+          <label class="campo-modale campo-riga">
+            <input type="checkbox" id="campoSecondoAttivo"> Rientro / turno spezzato con pausa
+          </label>
+          <div id="campiSecondoSegmento" class="griglia-check" style="display:none;">
+            <label class="campo-modale">Ora inizio (dopo la pausa)<input type="time" id="campoSecondoOraInizio"></label>
+            <label class="campo-modale">Ora fine<input type="time" id="campoSecondoOraFine"></label>
+          </div>
+          <p class="sotto-titolo" style="margin:-4px 0 6px;">Esempio: turno 08:00–14:00, pausa, poi rientro 15:00–18:00 — il periodo di pausa non viene conteggiato.</p>
+
+          <p style="margin:6px 0 -2px; font-weight:700;">Straordinario</p>
+          <label class="campo-modale">Straordinario prima del turno — dalle<input type="time" id="campoStrPrimaInizio"></label>
+          <label class="campo-modale">...alle (di solito l'inizio del turno)<input type="time" id="campoStrPrimaFine"></label>
+          <label class="campo-modale">Straordinario dopo il turno — dalle (di solito la fine del turno)<input type="time" id="campoStrDopoInizio"></label>
+          <label class="campo-modale">...alle<input type="time" id="campoStrDopoFine"></label>
+          <p class="sotto-titolo" id="anteprimaStraordinario" style="margin:-4px 0 6px;"></p>
+          <label class="campo-modale campo-riga">
+            <input type="checkbox" id="campoCompensaStraordinario"> Converti lo straordinario di oggi in riposo compensativo (non entra nel calcolo della paga)
+          </label>
+
+          <label class="campo-modale campo-riga">
+            <input type="checkbox" id="campoPermessoBreveAttivo"> Permesso breve durante questo turno
+          </label>
+          <div id="campiPermessoBreve" style="display:none;">
+            <div class="griglia-check">
+              <label class="campo-modale">Permesso breve — dalle<input type="time" id="campoPermessoBreveInizio"></label>
+              <label class="campo-modale">alle<input type="time" id="campoPermessoBreveFine"></label>
+            </div>
+            <p class="sotto-titolo" id="anteprimaPermessoBreve" style="margin:-4px 0 6px;">Le ore di permesso breve si tolgono dalle ore lavorative del turno (es. turno 13:00–19:00 con permesso 18:00–19:00 = 5h lavorate, 1h di permesso) e scalano per sempre il saldo di Permesso breve in Assenze — recuperarle in seguito non fa tornare su il saldo, serve solo a non perdere la retribuzione di quell'ora.</p>
+          </div>
+
+          <label class="campo-modale campo-riga">
+            <input type="checkbox" id="campoRecuperoPermessoBreveAttivo"> Recupero permesso breve durante questo turno
+          </label>
+          <div id="campiRecuperoPermessoBreve" style="display:none;">
+            <div class="griglia-check">
+              <label class="campo-modale">Recupero — dalle<input type="time" id="campoRecuperoPermessoBreveInizio"></label>
+              <label class="campo-modale">alle<input type="time" id="campoRecuperoPermessoBreveFine"></label>
+            </div>
+            <p class="sotto-titolo" id="anteprimaRecuperoPermessoBreve" style="margin:-4px 0 6px;">Queste ore, a differenza del permesso breve, entrano nel calcolo della paga (ore retribuite in più), ma non si sommano al totale ore del turno né toccano il saldo rimanente di Permesso breve: scalano solo il debito di "ore da recuperare".</p>
+          </div>
+
+          <div class="griglia-check">
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoReperibilita"> Reperibilità</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoMissione"> Missione</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoServizioEsterno"> Servizio esterno</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoOrdinePubblico"> Ordine pubblico</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoControlloTerritorio"> Controllo del territorio</label>
+            <p class="sotto-titolo" style="grid-column:1/-1; margin:-4px 0 4px;">Spetta solo con almeno 3h continuative in fascia serale/notturna, e non è cumulabile con l'Ordine pubblico: se spunti entrambe su questo turno non verrà calcolata.</p>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoCambioTurno"> Cambio turno</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoCompensazioneRiposo"> Lavorato sul riposo (diritto a recupero riposo)</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoRecuperoFestivo"> Lavorato in giorno festivo (diritto a recupero festivo)</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoBuonoPasto"> Buono pasto</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoAggiornamentoProfessionale"> Aggiornamento professionale</label>
+            <label class="campo-modale campo-riga"><input type="checkbox" id="campoAddestramentoTiro"> Addestramento tiro</label>
+            <p class="sotto-titolo" style="grid-column:1/-1; margin:-4px 0 4px;">Sul calendario mostrano rispettivamente la sigla "AGG" e "TIRI" al posto dell'orario del turno.</p>
+          </div>
+          <div id="campoDurataMissioneBox" style="display:none; margin-top:6px;">
+            <label class="campo-modale">Durata missione (ore)
+              <input type="number" id="campoDurataMissione" min="0" step="0.5" value="0">
+            </label>
+            <p class="sotto-titolo" style="margin:2px 0 0;">Indennità oraria di trasferta: 0€ fino a 4h, tariffa piena 4-8h, ridotta al 40% oltre le 8h (fonte SIULP). Il rimborso pasti su ricevuta non è calcolato automaticamente.</p>
+          </div>
+          <div id="campoOrdinePubblicoBox" style="display:none; margin-top:6px;">
+            <label class="campo-modale">Sede del servizio di ordine pubblico
+              <select id="campoOPSede"><option value="in">In sede</option><option value="fuori">Fuori sede</option></select>
+            </label>
+            <label class="campo-modale campo-riga" id="campoOPPernottamentoBox" style="margin-top:4px; display:none;">
+              <input type="checkbox" id="campoOPPernottamento" checked> Con pernottamento fuori sede
+            </label>
+            <p class="sotto-titolo" style="margin:2px 0 0;">Spetta solo per turni di almeno 4 ore (fonte SIULP); sotto le 4h fuori sede spetterebbe invece il trattamento di missione, da spuntare separatamente.</p>
+          </div>
+        </div>
+        <div id="anteprimaClassificazione" class="anteprima-classificazione"></div>
+      </div>
+      <div class="pannello-turno-footer">
+        <button class="btn-secondario" id="btnRimuoviTurno" type="button">Rimuovi turno</button>
+        <button class="btn-primario" id="btnSalvaTurno" type="button">Salva turno</button>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <div id="vistaCedolino" hidden>
+  <section class="scheda" id="sezioneRiepilogo">
+    <h2>Riepilogo Ore del Mese</h2>
+    <p class="sotto-titolo">Classificazione automatica: nessun importo, solo ore riconosciute dal motore a partire dai turni inseriti.</p>
+    <table class="tabella-voci" id="tabellaRiepilogoOre">
+      <thead><tr><th>Categoria</th><th>Ore</th></tr></thead>
+      <tbody>
+        <tr><td>Ore ordinarie</td><td class="totale-riga" id="rOrdinarie">0,00</td></tr>
+        <tr><td>Ore notturne</td><td class="totale-riga" id="rNotturne">0,00</td></tr>
+        <tr><td>Ore festive</td><td class="totale-riga" id="rFestive">0,00</td></tr>
+        <tr><td>Ore domenicali</td><td class="totale-riga" id="rDomenicali">0,00</td></tr>
+        <tr><td>Ore notturne festive</td><td class="totale-riga" id="rNotturneFestive">0,00</td></tr>
+        <tr><td>Straordinario diurno</td><td class="totale-riga" id="rStrDiurno">0,00</td></tr>
+        <tr><td>Straordinario notturno</td><td class="totale-riga" id="rStrNotturno">0,00</td></tr>
+        <tr><td>Straordinario festivo</td><td class="totale-riga" id="rStrFestivo">0,00</td></tr>
+        <tr><td>Straordinario notturno festivo</td><td class="totale-riga" id="rStrNotturnoFestivo">0,00</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td>Giorni di riposo</td><td class="totale-riga" id="rRiposi">0</td></tr>
+        <tr><td>Giorni di reperibilità</td><td class="totale-riga" id="rReperibilita">0</td></tr>
+        <tr><td>Giorni di missione</td><td class="totale-riga" id="rMissioni">0</td></tr>
+        <tr><td>Giorni di servizio esterno</td><td class="totale-riga" id="rServizioEsterno">0</td></tr>
+        <tr><td>Giorni di ordine pubblico</td><td class="totale-riga" id="rOrdinePubblico">0</td></tr>
+        <tr><td>Giorni di controllo del territorio</td><td class="totale-riga" id="rControlloTerritorio">0</td></tr>
+        <tr><td>Buoni pasto maturati <span class="sotto-titolo" style="font-size:0.7rem;">(informativo, non in busta paga)</span></td><td class="totale-riga" id="rBuoniPasto">0</td></tr>
+        <tr><td>Ore di straordinario convertite in riposo compensativo questo mese <span class="sotto-titolo" style="font-size:0.7rem;">(escluse dalla paga — il saldo totale disponibile è in Assenze, non si azzera cambiando mese)</span></td><td class="totale-riga" id="rOreCompensate">0,00</td></tr>
+      </tfoot>
+    </table>
+  </section>
+
+  <section class="scheda" id="sezioneCedolino">
+    <h2>Cedolino Simulato</h2>
+    <p class="sotto-titolo">Genera il cedolino del mese visualizzato a partire da anagrafica, turni e tabelle ufficiali. A dicembre la tredicesima viene aggiunta automaticamente.</p>
+    <label class="campo-modale" style="max-width:260px; margin-bottom:12px;">Conguagli manuali del mese (€)
+      <input type="number" id="campoConguagliMese" step="0.01" value="0">
+    </label>
+    <button class="btn-primario" id="btnGeneraCedolino" type="button">Genera Cedolino</button>
+    <div id="contenitoreCedolino" class="contenitore-cedolino" hidden></div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+      <button class="btn-secondario" id="btnStampaCedolino" type="button" hidden>🖨️ Stampa / Esporta PDF</button>
+      <button class="btn-secondario" id="btnNascondiCedolino" type="button" hidden>🗑️ Cancella Cedolino</button>
+    </div>
+  </section>
+
+  <section class="scheda" id="sezioneAccreditoConto">
+    <h2>💰 Cosa arriva sul conto</h2>
+    <p class="sotto-titolo">Il Cedolino Simulato sopra mostra quanto <strong>maturi</strong> lavorando nel mese selezionato. Questa scheda invece ricostruisce quanto ti <strong>arriva davvero sul conto</strong> in quel mese, tenendo conto dei tempi reali di accredito NoiPA: lo stipendio base del mese lavorato arriva il mese dopo, le indennità accessorie con un mese di ritardo ulteriore. La tredicesima invece non è sfasata, arriva a dicembre.</p>
+    <p class="avviso-tabelle">⚠ Il calcolo fiscale qui è una stima: nella realtà NoiPA emette due cedolini separati (stipendio e accessorio) con trattamento fiscale proprio; questa scheda somma i due lordi e applica un unico calcolo approssimato — usala per farti un'idea, non come previsione esatta.</p>
+    <button class="btn-primario" id="btnGeneraAccreditoConto" type="button">Genera Stima Accredito</button>
+    <div id="contenitoreAccreditoConto" class="contenitore-cedolino" hidden></div>
+    <button class="btn-secondario" id="btnCancellaAccreditoConto" type="button" hidden style="margin-top:12px;">🗑️ Cancella Stima Accredito</button>
+  </section>
+
+  <section class="scheda" id="sezioneStorico">
+    <div class="intestazione-scheda">
+      <h2>Storico Mensile</h2>
+      <button class="btn-mini-icona" id="btnCancellaStorico" title="Cancella storico" aria-label="Cancella storico">🗑️</button>
+    </div>
+    <p class="sotto-titolo">Ogni cedolino generato viene archiviato qui per il confronto tra mesi diversi.</p>
+    <table class="tabella-voci" id="tabellaStorico">
+      <thead><tr><th>Mese</th><th>Totale Lordo</th><th>Netto</th></tr></thead>
+      <tbody><tr><td colspan="3" class="sotto-titolo">Nessun cedolino generato finora.</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="scheda" id="sezioneRiepilogoAnnuale">
+    <h2>Riepilogo Annuale</h2>
+    <p class="sotto-titolo">Ore e competenze sommate su tutto l'anno scelto. Lordo e Netto includono solo i mesi per cui hai già generato il cedolino nella scheda "Cedolino Simulato".</p>
+    <div style="display:flex; gap:10px; align-items:end; margin-bottom:12px; flex-wrap:wrap;">
+      <label class="campo-modale" style="max-width:140px;">Anno
+        <input type="number" id="campoAnnoRiepilogo" min="2000" max="2100" step="1">
+      </label>
+      <button class="btn-primario" id="btnCalcolaRiepilogoAnnuale" type="button">Calcola</button>
+    </div>
+    <div id="contenitoreRiepilogoAnnuale" hidden>
+      <table class="tabella-voci">
+        <thead><tr><th>Categoria</th><th>Ore</th></tr></thead>
+        <tbody>
+          <tr><td>Ore ordinarie</td><td class="totale-riga" id="raOrdinarie">0</td></tr>
+          <tr><td>Ore notturne</td><td class="totale-riga" id="raNotturne">0</td></tr>
+          <tr><td>Ore festive</td><td class="totale-riga" id="raFestive">0</td></tr>
+          <tr><td>Ore domenicali</td><td class="totale-riga" id="raDomenicali">0</td></tr>
+          <tr><td>Ore notturne festive</td><td class="totale-riga" id="raNotturneFestive">0</td></tr>
+          <tr><td>Straordinario diurno</td><td class="totale-riga" id="raStrDiurno">0</td></tr>
+          <tr><td>Straordinario notturno</td><td class="totale-riga" id="raStrNotturno">0</td></tr>
+          <tr><td>Straordinario festivo</td><td class="totale-riga" id="raStrFestivo">0</td></tr>
+          <tr><td>Straordinario notturno festivo</td><td class="totale-riga" id="raStrNotturnoFestivo">0</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Totale Lordo Annuo <span class="sotto-titolo" id="raMesiLordo" style="font-size:0.7rem;"></span></td><td class="totale-riga" id="raTotaleLordo">0,00 €</td></tr>
+          <tr><td>Totale Netto Annuo</td><td class="totale-riga" id="raTotaleNetto">0,00 €</td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <button class="btn-secondario" id="btnCancellaRiepilogoAnnuale" type="button" hidden style="margin-top:12px;">🗑️ Cancella Riepilogo</button>
+  </section>
+  </div>
+
+  <div id="vistaAssenze" hidden>
+  <section class="scheda" id="sezioneAssenze">
+    <div class="intestazione-scheda">
+      <h2>Assenze dal Servizio</h2>
+      <button class="btn-mini-icona" id="btnAggiungiAssenza" title="Aggiungi voce" aria-label="Aggiungi voce">+</button>
+    </div>
+    <p class="sotto-titolo">Elenco personalizzabile: modifica i valori, aggiungi o rimuovi voci. Puramente informativo, non incide sul calcolo del cedolino. Le modifiche si salvano da sole.</p>
+    <p class="sotto-titolo" style="margin-top:-6px;">📌 <strong>Congedo ordinario</strong>: non è uguale per tutti, dipende dagli anni di servizio (fonte SIULP). Con orario su 6 giorni: 30gg (1-3 anni) · 32gg (4-15 anni) · 37gg (oltre 15 anni) · 45gg (oltre 25 anni). Con orario su 5 giorni (sabato non lavorativo): 26gg · 28gg · 32gg · 39gg. Imposta tu il valore corretto in base alla tua situazione.</p>
+    <p class="sotto-titolo" style="margin-top:-6px;">📌 <strong>Riposo compensativo</strong>: ore automatiche, non modificabili qui. Si accumulano da sole quando spunti "Converti in riposo compensativo" su un turno con straordinario; si consumano quando su un giorno selezioni questa assenza e indichi il turno sostituito (es. 13:00–19:00 = 6h).</p>
+    <p class="sotto-titolo" style="margin-top:-6px;">📌 <strong>Congedo straordinario</strong>: si ricarica ogni anno (non si accumula). Se il saldo dell'anno si esaurisce prima del 31/12, l'app non passa da sola all'Aspettativa: dal quel momento seleziona manualmente "Aspettativa" sui giorni successivi.</p>
+    <p class="sotto-titolo" style="margin-top:-6px;">📌 <strong>Maternità/Paternità</strong> e <strong>Congedo parentale</strong>: servono solo a segnare le date sul calendario, non calcolano alcun importo — il pagamento reale varia nel tempo (es. 100% durante l'astensione obbligatoria, 30% e poi meno durante il congedo parentale) in un modo che questo simulatore non è pensato per gestire. Imposta tu il valore in giorni in base al tuo caso specifico.</p>
+    <div id="corpoAssenze"></div>
+  </section>
+  </div>
+
+<div id="vistaAnagrafica" hidden>
+  <section class="scheda" id="sezioneAnagrafica">
+    <h2>Anagrafica</h2>
+    <label class="campo-modale">Qualifica
+      <select id="campoQualifica">
+        <option>Agente</option><option>Agente Scelto</option><option>Assistente</option>
+        <option>Assistente Capo</option><option>Assistente Capo Coordinatore</option>
+        <option>Vice Sovrintendente</option><option>Sovrintendente</option><option>Sovrintendente Capo</option>
+        <option>Sovrintendente Capo Coordinatore</option>
+        <option>Vice Ispettore</option><option>Ispettore</option><option>Ispettore Capo</option><option>Ispettore Superiore</option>
+        <option>Sostituto Commissario</option><option>Sostituto Commissario Coordinatore</option>
+        <option>Vice Commissario</option><option>Commissario</option><option>Commissario Capo</option>
+      </select>
+    </label>
+    <div class="campo-modale">
+      <span>Parametro stipendiale</span>
+      <div class="valore-automatico" id="visualizzaParametro">—</div>
+    </div>
+    <label class="campo-modale">Anni di servizio
+      <input type="number" id="campoAnni" min="0" step="1">
+    </label>
+    <label class="campo-modale">Assegno funzionale
+      <select id="campoAssegnoFunzionale"><option value="no">No</option><option value="si">Sì</option></select>
+    </label>
+    <label class="campo-modale">Sede di servizio
+      <input type="text" id="campoSede" placeholder="es. Questura di Milano">
+    </label>
+    <label class="campo-modale">Regione
+      <select id="campoRegione">
+        <option>Abruzzo</option><option>Basilicata</option><option>Calabria</option><option>Campania</option>
+        <option>Emilia-Romagna</option><option>Friuli Venezia Giulia</option><option>Lazio</option><option>Liguria</option>
+        <option>Lombardia</option><option>Marche</option><option>Molise</option><option>Piemonte</option>
+        <option>Provincia di Trento</option><option>Provincia di Bolzano</option>
+        <option>Puglia</option><option>Sardegna</option><option>Sicilia</option><option>Toscana</option>
+        <option>Umbria</option><option>Valle d'Aosta</option><option>Veneto</option>
+      </select>
+    </label>
+    <label class="campo-modale">Comune
+      <input type="text" id="campoComune" placeholder="es. Milano">
+    </label>
+    <p class="sotto-titolo" style="margin:-6px 0 0;">📌 L'addizionale regionale ora si calcola da sola in base alla regione scelta e allo scaglione di reddito annuo (fonte: elenco ufficiale aliquote regionali 2026) — non serve più inserirla a mano.</p>
+    <label class="campo-modale">Addizionale comunale IRPEF (%)
+      <input type="number" id="campoAddComunale" min="0" step="0.01" placeholder="dal tuo cedolino reale, es. 0,80">
+    </label>
+    <label class="campo-modale">Coniuge a carico
+      <select id="campoConiugeACarico"><option value="no">No</option><option value="si">Sì</option></select>
+    </label>
+    <label class="campo-modale">Figli a carico under 21 anni (numero)
+      <input type="number" id="campoFigliUnder21" min="0" step="1" value="0">
+    </label>
+    <label class="campo-modale">Figli a carico over 21 anni (numero)
+      <input type="number" id="campoFigliOver21" min="0" step="1" value="0">
+    </label>
+    <p class="sotto-titolo" style="margin:-6px 0 4px;">⚠ Per i figli under 21 anni la detrazione fiscale è quasi sempre sostituita dall'Assegno Unico Universale (dal marzo 2022) e non si somma ad esso — se lo percepisci, lascia questo campo a 0 per non falsare il netto stimato.</p>
+    <label class="campo-modale">Iscrizione sindacale (facoltativa)
+      <input type="text" id="campoSindacato" placeholder="es. SIULP — lascia vuoto se nessuna">
+    </label>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+      <button class="btn-primario" id="btnSalvaAnagrafica" type="button">Salva</button>
+      <button class="btn-secondario" id="btnCancellaAnagrafica" type="button">🗑️ Cancella Anagrafica</button>
+    </div>
+  </section>
+  </div>
+
+
+
+<div id="vistaTabelle" hidden>
+  <section class="scheda" id="sezioneTabelle">
+    <h2>Tabelle Ufficiali</h2>
+    <p class="avviso-tabelle">⚠ Valori indicativi tratti da fonti pubbliche (rinnovo CCNL 2022-2024 e Legge di Bilancio 2026). <strong>Verificali e correggili confrontandoli con il tuo cedolino NoiPA reale</strong> prima di usarli per decisioni economiche: stipendi, indennità e aliquote possono cambiare con i rinnovi contrattuali.</p>
+    <div id="corpoTabelle"></div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+      <button class="btn-secondario" id="btnResetTabelle" type="button">Ripristina predefiniti</button>
+      <button class="btn-primario" id="btnSalvaTabelle" type="button">Salva</button>
+    </div>
+  </section>
+  </div>
+
+<!-- MODALE AVVISO/CONFERMA (sostituisce alert/confirm nativi, non affidabili in tutti i contesti) -->
+<div class="overlay" id="overlayAvviso" hidden>
+  <div class="modale">
+    <div class="modale-header"><h2 id="titoloAvviso">Avviso</h2></div>
+    <div class="modale-corpo">
+      <p id="testoAvviso" style="white-space:pre-line; margin:0;"></p>
+    </div>
+    <div class="modale-footer">
+      <button class="btn-secondario" id="btnAnnullaAvviso" type="button">Annulla</button>
+      <button class="btn-primario" id="btnConfermaAvviso" type="button">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE VAI AL MESE -->
+<div class="overlay" id="overlayVaiAMese" hidden>
+  <div class="modale">
+    <div class="modale-header"><h2>Vai al mese</h2><button class="btn-icona" id="btnChiudiVaiAMese" aria-label="Chiudi">✕</button></div>
+    <div class="modale-corpo">
+      <label class="campo-modale">Mese
+        <select id="campoVaiMese">
+          <option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option>
+          <option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option>
+          <option value="6">Luglio</option><option value="7">Agosto</option><option value="8">Settembre</option>
+          <option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option>
+        </select>
+      </label>
+      <label class="campo-modale">Anno
+        <input type="number" id="campoVaiAnno" min="2000" max="2100" step="1">
+      </label>
+    </div>
+    <div class="modale-footer">
+      <button class="btn-secondario" id="btnVaiOggi" type="button">Oggi</button>
+      <button class="btn-primario" id="btnVaiAMese" type="button">Vai</button>
+    </div>
+  </div>
+</div>
+
+<div id="vistaSequenza" hidden>
+  <section class="scheda" id="sezioneSequenza">
+    <div class="intestazione-scheda">
+      <h2>Sequenza Turni Automatica</h2>
+      <button class="btn-mini-icona" id="btnChiudiSequenza" title="Torna ai turni" aria-label="Torna ai turni">✕</button>
+    </div>
+    <p class="sotto-titolo">Genera automaticamente la turnazione a partire da una data, ripetendo ciclicamente la sequenza che definisci (es. il "turno in quinta": Sera, Pomeriggio, Mattina, Notte, Riposo).</p>
+    <div style="margin-bottom:10px;">
+      <button class="btn-secondario" id="btnModelloTurnoInQuinta" type="button">🔄 Modello: turno in quinta (Sera-Pom-Matt-Notte-Riposo)</button>
+      <button class="btn-secondario" id="btnModelloSettimanaCorta" type="button">📋 Modello: settimana corta (7gg)</button>
+      <p class="sotto-titolo" style="margin:4px 0 0;">Lun-Ven 08:00-14:00, con rientro pomeridiano 15:00-18:00 (3h) il martedì e il giovedì, sabato e domenica di riposo. Le 7 righe sostituiscono la sequenza attuale — modificale liberamente dopo averle inserite.</p>
+      <button class="btn-secondario" id="btnModelloSettimanaLunga" type="button" style="margin-top:8px;">📋 Modello: settimana lunga (7gg)</button>
+      <p class="sotto-titolo" style="margin:4px 0 0;">Lun-Sab 08:00-14:00, domenica di riposo. Le 7 righe sostituiscono la sequenza attuale — modificale liberamente dopo averle inserite.</p>
+    </div>
+    <label class="campo-modale">Data di inizio
+      <input type="date" id="campoSequenzaDataInizio">
+    </label>
+    <label class="campo-modale">Durata
+      <select id="campoSequenzaDurataPreset">
+        <option value="personalizzato">Numero di giorni personalizzato</option>
+        <option value="settimana">1 settimana (7 giorni)</option>
+        <option value="mese">1 mese</option>
+        <option value="mese3">3 mesi</option>
+        <option value="mese6">6 mesi</option>
+        <option value="mese9">9 mesi</option>
+        <option value="anno">1 anno</option>
+      </select>
+    </label>
+    <label class="campo-modale">Numero di giorni da generare
+      <input type="number" id="campoSequenzaGiorni" min="1" max="366" value="30">
+    </label>
+    <div class="campo-modale">
+      <span>Sequenza (si ripete ciclicamente)</span>
+      <div id="listaSequenza" class="lista-sequenza"></div>
+      <button class="btn-secondario" id="btnAggiungiStepSequenza" type="button">+ Aggiungi passaggio</button>
+    </div>
+    <p class="avviso-tabelle">⚠ Sovrascrive eventuali turni già inseriti nei giorni interessati.</p>
+    <div style="display:flex; gap:10px; margin-top:6px; flex-wrap:wrap;">
+      <button class="btn-primario" id="btnGeneraSequenza" type="button">Genera</button>
+      <button class="btn-secondario" id="btnContinuaSequenza" type="button">▶️ Continua turnazione</button>
+    </div>
+    <p class="sotto-titolo" style="margin:6px 0 0;">"Genera" riparte sempre dal primo passaggio della sequenza, usando la data di inizio che scrivi tu. "Continua turnazione" invece ignora quella data: riparte da sola subito dopo l'ultimo giorno generato in precedenza (senza toccare quelli già inseriti) e calcola anche a che punto della rotazione ci si trova, così puoi generare i giorni successivi senza sfasare i turni — usala dopo aver già generato una prima volta.</p>
+  </section>
+  </div>
+
+  <section class="scheda" id="sezioneBackup">
+    <h2>Backup Dati</h2>
+    <p class="sotto-titolo">Tutti i dati sono salvati solo su questo dispositivo/browser. Esporta un backup periodicamente per non perderli in caso di cambio telefono o cancellazione dati.</p>
+    <p class="sotto-titolo" id="statoBackup"></p>
+    <div class="barra-backup">
+      <button class="btn-secondario" id="btnEsportaBackup" type="button">💾 Esporta Backup (JSON)</button>
+      <button class="btn-secondario" id="btnImportaBackup" type="button">📥 Importa Backup</button>
+      <input type="file" id="campoImportaBackup" accept="application/json" hidden>
+    </div>
+    <p class="sotto-titolo" style="margin-top:8px;">📌 Il file esportato finisce di solito nella cartella Download del telefono — che <strong>non è al sicuro</strong>, perché è sullo stesso dispositivo. Per un backup vero, spostalo o condividilo su un servizio cloud (Google Drive, iCloud, Dropbox) oppure inviatelo via email o un'altra app: se il file resta solo nel telefono, un guasto, un furto o un ripristino di fabbrica lo cancellano insieme a tutto il resto.</p>
+  </section>
+
+  <section class="scheda nota-finale">
+    <p class="nota-piede">Cedolino simulato con conguagli manuali, tredicesima automatica a dicembre e storico mensile. Valori delle tabelle ufficiali indicativi: verificali sul tuo cedolino reale prima di usarli per decisioni economiche.</p>
+    <p class="nota-piede" style="margin-top:8px;">Progetto indipendente, non ufficiale e non affiliato alla Polizia di Stato né ad alcun ente pubblico. Tutti i valori delle tabelle sono stati reperiti da fonti pubbliche disponibili online (siti sindacali, normativa pubblicata) e possono contenere errori, essere incompleti o non aggiornati. L'autore declina ogni responsabilità per incongruenze, errori o danni derivanti dall'uso di questa app: verifica sempre i dati sul tuo cedolino ufficiale prima di prendere decisioni economiche o personali.</p>
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
