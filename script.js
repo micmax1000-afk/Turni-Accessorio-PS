@@ -199,9 +199,10 @@ const TABELLE_PREDEFINITE = {
   // aggiuntiva rispetto alla presenza festiva generica; spetta per le festività fisse
   // (1/1, 6/1, Lunedì dell'Angelo, 25/4, 1/5, 2/6, 15/8, 1/11, 8/12, 25/12, 26/12), non per le domeniche semplici
   indennitaFestivitaParticolareGiorno: 40.00,
-  // Compensazione riposo lavorato — fonte: SIULP (https://siulp.it/i-tuoi-diritti/trattamento-economico-accessorio/10/#undici)
+  // Compensazione riposo lavorato — fonte: art.16 c.3 D.P.R. 164/2002, rivalutata dal D.P.R. 57/2022 a 12,00€
+  // (indicazione dell'utente, più precisa della stima SIULP usata prima, che era 5,00€)
   // spetta se richiamati in servizio nel giorno di riposo settimanale o in un festivo infrasettimanale
-  indennitaCompensazioneRiposoLavorato: 5.00,
+  indennitaCompensazioneRiposoLavorato: 12.00,
   // Cambio turno — fonte: accordo FESI 2025 (SIULP, in pagamento da luglio 2026, aggiornato annualmente per accordo sindacale)
   // il compenso di 610€/anno per il personale dei reparti mobili non è modellato (caso troppo specifico)
   indennitaCambioTurno: 10.00,
